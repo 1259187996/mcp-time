@@ -1,0 +1,18 @@
+{
+  "name": "mcp-time",
+  "version": "1.0.0",
+  "description": "MCP-Time 是一个基于模型上下文协议的 Node.js 服务器，专门用于处理时间相关的查询",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "keywords": ["mcp", "time", "date", "model-context-protocol"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "zod": "^3.24.2"
+  }
+}

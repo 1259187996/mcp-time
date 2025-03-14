@@ -1,0 +1,20 @@
+# Smithery.ai 配置文件
+startCommand:
+  type: stdio
+  configSchema:
+    # 定义 MCP 服务器的配置选项
+    type: object
+    properties:
+      defaultTimezone:
+        type: string
+        description: "默认时区，如 'Asia/Shanghai'"
+        default: "Asia/Shanghai"
+    additionalProperties: false
+  commandFunction: |-
+    (config) => ({
+      command: "node",
+      args: ["index.js"],
+      env: {
+        DEFAULT_TIMEZONE: config.defaultTimezone || "Asia/Shanghai"
+      }
+    }) 
