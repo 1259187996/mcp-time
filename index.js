@@ -7,11 +7,11 @@
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { HttpServerTransport } from "@modelcontextprotocol/sdk/server/http.js";
+import { WebSocketServerTransport } from "@modelcontextprotocol/sdk/server/websocket.js";
 import { z } from "zod";
 import timeUtils from './timeUtils.js';
-import http from 'http';
+import { createServer } from 'http';
+import { WebSocketServer } from 'ws';
 
 // 创建 MCP 服务器
 const server = new McpServer({
@@ -216,9 +216,10 @@ server.tool(
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
-// 创建 HTTP 服务器
-const httpServer = http.createServer();
-const transport = new HttpServerTransport(httpServer);
+// 创建 HTTP 服务器和 WebSocket 服务器
+const httpServer = createServer();
+const wss = new WebSocketServer({ server: httpServer });
+const transport = new WebSocketServerTransport(wss);
 
 // 启动服务器
 try {
