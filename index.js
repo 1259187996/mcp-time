@@ -8,12 +8,10 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { HttpServerTransport } from "@modelcontextprotocol/sdk/server/http.js";
 import { z } from "zod";
 import timeUtils from './timeUtils.js';
-
-// 从环境变量获取默认时区
-const DEFAULT_TIMEZONE = process.env.DEFAULT_TIMEZONE || 'Asia/Shanghai';
-console.error(`使用默认时区: ${DEFAULT_TIMEZONE}`);
+import http from 'http';
 
 // 创建 MCP 服务器
 const server = new McpServer({
@@ -29,12 +27,11 @@ server.tool(
     timezone: z.string().optional().describe("时区标识符，如 'Asia/Shanghai'")
   },
   async ({ timezone }) => {
-    // 如果未指定时区，使用默认时区
-    const timeInfo = timeUtils.getCurrentTime(timezone || DEFAULT_TIMEZONE);
+    const timeInfo = timeUtils.getCurrentTime(timezone);
     
     let responseText = `当前时间是 ${timeInfo.time}，${timeInfo.date} ${timeInfo.weekday}`;
-    if (timezone || DEFAULT_TIMEZONE) {
-      responseText += `（${timezone || DEFAULT_TIMEZONE}时区）`;
+    if (timezone) {
+      responseText += `（${timezone}时区）`;
     }
     
     return {
@@ -215,13 +212,21 @@ server.tool(
   }
 );
 
-// 启动服务器，通过标准输入/输出进行通信
-console.error("MCP-Time 服务器启动中...");
-const transport = new StdioServerTransport();
+// 配置服务器端口
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
+// 创建 HTTP 服务器
+const httpServer = http.createServer();
+const transport = new HttpServerTransport(httpServer);
+
+// 启动服务器
 try {
   await server.connect(transport);
-  console.error("MCP-Time 服务器已连接");
+  httpServer.listen(PORT, HOST, () => {
+    console.log(`MCP-Time 服务器已启动，监听 ${HOST}:${PORT}`);
+  });
 } catch (error) {
-  console.error("MCP-Time 服务器连接失败:", error);
-} 
+  console.error("MCP-Time 服务器启动失败:", error);
+  process.exit(1);
+}
