@@ -58,3 +58,6 @@ ecosystem.config.js.bak
 .Trashes
 ehthumbs.db
 Thumbs.db
+node_modules/
+.idea/
+.vscode/

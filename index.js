@@ -7,11 +7,13 @@
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { WebSocketServerTransport } from "@modelcontextprotocol/sdk/server/websocket.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import timeUtils from './timeUtils.js';
-import { createServer } from 'http';
-import { WebSocketServer } from 'ws';
+
+// 设置默认时区
+const defaultTimezone = process.env.DEFAULT_TIMEZONE || 'Asia/Shanghai';
+console.log('使用默认时区:', defaultTimezone);
 
 // 创建 MCP 服务器
 const server = new McpServer({
@@ -27,7 +29,7 @@ server.tool(
     timezone: z.string().optional().describe("时区标识符，如 'Asia/Shanghai'")
   },
   async ({ timezone }) => {
-    const timeInfo = timeUtils.getCurrentTime(timezone);
+    const timeInfo = timeUtils.getCurrentTime(timezone || defaultTimezone);
     
     let responseText = `当前时间是 ${timeInfo.time}，${timeInfo.date} ${timeInfo.weekday}`;
     if (timezone) {
@@ -96,7 +98,7 @@ server.tool(
     timezone: z.string().optional().describe("时区标识符")
   },
   async ({ days, timezone }) => {
-    const dateInfo = timeUtils.getRelativeDate(days, timezone);
+    const dateInfo = timeUtils.getRelativeDate(days, timezone || defaultTimezone);
     
     let responseText = `${dateInfo.relativeText}是 ${dateInfo.date} ${dateInfo.weekday}`;
     if (timezone) {
@@ -212,22 +214,14 @@ server.tool(
   }
 );
 
-// 配置服务器端口
-const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || '0.0.0.0';
-
-// 创建 HTTP 服务器和 WebSocket 服务器
-const httpServer = createServer();
-const wss = new WebSocketServer({ server: httpServer });
-const transport = new WebSocketServerTransport(wss);
-
 // 启动服务器
+console.log("MCP-Time 服务器启动中...");
+const transport = new StdioServerTransport();
+
 try {
   await server.connect(transport);
-  httpServer.listen(PORT, HOST, () => {
-    console.log(`MCP-Time 服务器已启动，监听 ${HOST}:${PORT}`);
-  });
+  console.log("MCP-Time 服务器已连接");
 } catch (error) {
-  console.error("MCP-Time 服务器启动失败:", error);
+  console.error("MCP-Time 服务器连接失败:", error);
   process.exit(1);
 }
