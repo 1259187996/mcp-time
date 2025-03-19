@@ -1,4 +1,4 @@
- /**
+/**
  * MCP-Time 服务器
  * 
  * 这是一个基于模型上下文协议（Model Context Protocol）的 Node.js 服务器，
@@ -7,7 +7,7 @@
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { WebSocketServerTransport } from "@modelcontextprotocol/sdk/server/websocket.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import timeUtils from './timeUtils.js';
 
@@ -218,11 +218,11 @@ server.tool(
 
 // 启动服务器
 console.log("MCP-Time 服务器启动中...");
-const transport = new WebSocketServerTransport({ port });
+const transport = new StdioServerTransport();
 
 try {
   await server.connect(transport);
-  console.log(`MCP-Time 服务器已连接，正在监听端口 ${port}`);
+  console.log("MCP-Time 服务器已连接");
 } catch (error) {
   console.error("MCP-Time 服务器连接失败:", error);
   process.exit(1);
